@@ -14,4 +14,4 @@ python -m pip install -r requirements.txt
 
 ## 4. FastAPI 실행
 
-python -m uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload --port 8001
