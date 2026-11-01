@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from pathlib import Path
 import subprocess
@@ -31,10 +32,15 @@ async def lifespan(app: FastAPI):
         "-c:a", "aac",
         "-b:a", "128k",
         "-ar", "44100",
+        "-ac", "2",
 
+				# 오디오 타임스탬프 보정
+    		"-af", "aresample=async=1000:first_pts=0",
+
+				# HLS
         "-f", "hls",
-        "-hls_time", "6",
-        "-hls_list_size", "5",
+        "-hls_time", "2",
+        "-hls_list_size", "10",
         "-hls_flags", "delete_segments+omit_endlist",
         "-hls_segment_filename", str(HLS_DIR / "segment_%06d.ts"),
         str(HLS_DIR / "live.m3u8"),
@@ -61,6 +67,13 @@ app = FastAPI(
     description="FastAPI REST API Server",
     version="1.0.0",
     lifespan=lifespan  # 추가
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 print("HLS_DIR:", HLS_DIR)
